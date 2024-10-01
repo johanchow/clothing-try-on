@@ -5,6 +5,9 @@ from qcloud_cos import CosConfig
 from qcloud_cos import CosS3Client
 from helper.util import hash_string
 
+print('COS_SECRET_ID: '+os.getenv('COS_SECRET_ID'))
+print(os.getenv('COS_SECRET_KEY'))
+print(os.getenv('COS_REGION'))
 secret_id = os.getenv('COS_SECRET_ID')
 secret_key = os.getenv('COS_SECRET_KEY')
 region = os.getenv('COS_REGION')  # 替换为用户的 region，已创建桶归属的 region 可以在控制台查看，https://console.cloud.tencent.com/cos5/bucket
