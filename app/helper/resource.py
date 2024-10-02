@@ -5,9 +5,6 @@ from qcloud_cos import CosConfig
 from qcloud_cos import CosS3Client
 from helper.util import hash_string
 
-print('COS_SECRET_ID: '+os.getenv('COS_SECRET_ID'))
-print(os.getenv('COS_SECRET_KEY'))
-print(os.getenv('COS_REGION'))
 secret_id = os.getenv('COS_SECRET_ID')
 secret_key = os.getenv('COS_SECRET_KEY')
 region = os.getenv('COS_REGION')  # 替换为用户的 region，已创建桶归属的 region 可以在控制台查看，https://console.cloud.tencent.com/cos5/bucket
@@ -46,3 +43,15 @@ def copy_resource_to_cos(resource_url):
   extension = mimetypes.guess_extension(content_type)
   key = hash_string(resource_url)
   return upload_resource_to_cos(response.content, key+extension)
+
+def get_resource_from_cos(path_key):
+  """get resource from cos
+  :param key(string): cos key
+  """
+  response = client.get_object(
+    Bucket=bucket,
+    Key=path_key
+  )
+  # 获取文件内容
+  html_content = response['Body'].read().decode('utf-8')
+  return html_content
