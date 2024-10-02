@@ -15,6 +15,6 @@ def get_openid():
   url += "&connect_redirect=1"
 
   # 发送get请求到url
-  response = requests.get(url)
+  response = requests.get(url, None, verify=False)
   # 返回json格式的数据
   return jsonify(response.json()), 200
