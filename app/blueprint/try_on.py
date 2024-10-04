@@ -7,6 +7,8 @@ from helper.image import imread_image_from_url, copy_polygon_area
 from helper.util import generate_uuid
 from io import BytesIO
 import threading
+from PyPatchMatch import patch_match
+# from patchmatch import patch_match
 
 try_on = Blueprint('try_on', __name__)
 
@@ -95,7 +97,8 @@ def erase_polygon():
   cv2.fillPoly(mask, [polygon], 255)
 
   # 清除多边形区域，保留背景
-  result = cv2.inpaint(img, mask, 3, cv2.INPAINT_TELEA)
+  result = patch_match(img, mask, patch_size=3, iteration=5)
+  # result = cv2.inpaint(img, mask, 3, cv2.INPAINT_TELEA)
 
   # 将处理后的图像编码为 jpeg
   _, buffer = cv2.imencode('.jpg', result)
@@ -112,7 +115,14 @@ def update_generation_image():
   source_image = imread_image_from_url(data['source_image_url'])
   generation_image = imread_image_from_url(data['generation_image_url'])
   print('start copy')
-  result = copy_polygon_area(source_image, data['source_coordinates'], generation_image, data['generation_coordinates'])
+  result = copy_polygon_area(
+    source_image,
+    np.array(data['source_coordinates']),
+    data['source_bounding_box'],
+    generation_image,
+    np.array(data['generation_coordinates']),
+    data['generation_bounding_box'],
+  )
   print('finish copy')
 
   # 将处理后的图像编码为 jpeg

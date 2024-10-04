@@ -86,14 +86,11 @@ def resize_image(image, scale_width_factor, scale_height_factor):
 
 def copy_polygon_area(src_img, src_points, src_box, dst_img, dst_points, dst_box):
   src_mask = get_polygon_mask(src_img.shape, src_points)
-  center = (int(np.mean(dst_points[:, 0])), int(np.mean(dst_points[:, 1])))
-  output_image = cv2.seamlessClone(src_img, dst_img, src_mask, center, cv2.NORMAL_CLONE)
+  object_image, object_mask = extract_object_using_canny(src_img, src_mask)
+  # 原图和目标图尺寸不一样，物体放置前根据图片比例做缩放
+  width_ratio = dst_box['width'] / src_box['width']
+  height_ratio = dst_box['height'] / src_box['height']
+  resized_object_image = resize_image(object_image, width_ratio, height_ratio)
+  resized_object_mask = resize_image(object_mask, width_ratio, height_ratio)
+  output_image = place_object(dst_img, dst_points, resized_object_image, resized_object_mask)
   return output_image
-  # object_image, object_mask = extract_object_using_canny(src_img, src_mask)
-  # # 原图和目标图尺寸不一样，物体放置前根据图片比例做缩放
-  # width_ratio = dst_box['width'] / src_box['width']
-  # height_ratio = dst_box['height'] / src_box['height']
-  # resized_object_image = resize_image(object_image, width_ratio, height_ratio)
-  # resized_object_mask = resize_image(object_mask, width_ratio, height_ratio)
-  # output_image = place_object(dst_img, dst_points, resized_object_image, resized_object_mask)
-  # return output_image

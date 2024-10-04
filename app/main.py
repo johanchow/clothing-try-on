@@ -9,6 +9,8 @@ from blueprint.generation import generation
 from blueprint.static import static
 
 load_dotenv()
+import sys
+print(sys.path)
 app = Flask(__name__)
 CORS(app)
 app.register_blueprint(try_on, url_prefix='/try-on')
