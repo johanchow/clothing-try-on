@@ -12,7 +12,7 @@ COPY ./app /app
 # 切换到 /app/PyPatchMatch 目录
 WORKDIR /app/PyPatchMatch
 # 执行 make 命令
-# RUN make
+RUN make
 # 切换回原始的 /app 目录（如果需要继续其他操作）
 WORKDIR /app
 
