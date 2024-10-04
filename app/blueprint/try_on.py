@@ -97,7 +97,7 @@ def erase_polygon():
   cv2.fillPoly(mask, [polygon], 255)
 
   # 清除多边形区域，保留背景
-  result = patch_match.inpaint(img, mask, patch_size=3, iteration=5)
+  result = patch_match.inpaint(img, mask, patch_size=3)
   # result = cv2.inpaint(img, mask, 3, cv2.INPAINT_TELEA)
 
   # 将处理后的图像编码为 jpeg
