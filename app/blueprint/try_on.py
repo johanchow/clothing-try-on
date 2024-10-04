@@ -7,7 +7,7 @@ from helper.image import imread_image_from_url, copy_polygon_area
 from helper.util import generate_uuid
 from io import BytesIO
 import threading
-from PyPatchMatch import patch_match
+# from PyPatchMatch import patch_match
 # from patchmatch import patch_match
 
 try_on = Blueprint('try_on', __name__)
