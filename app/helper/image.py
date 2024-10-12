@@ -14,6 +14,16 @@ def imread_image_from_url(url):
   img = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
   return img
 
+def imread_from_file(file):
+  '''从上传文件流中读取图像
+  '''
+  # 将文件读取为字节流
+  file_bytes = file.read()
+  # 将字节流转换为 NumPy 数组
+  img_array = np.frombuffer(file_bytes, np.uint8)
+  # 使用 OpenCV 解码图像
+  img = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
+  return img
 
 def get_polygon_mask(image_shape, polygon_points):
     """

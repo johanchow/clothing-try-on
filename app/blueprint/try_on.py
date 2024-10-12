@@ -1,14 +1,14 @@
 from flask import Blueprint, jsonify, request, send_file
+import json
 import cv2
 import numpy as np
 from helper.mysql import execute_sql
 from helper.request import request_fooocus_try_on
-from helper.image import imread_image_from_url, copy_polygon_area
+from helper.image import imread_image_from_url, imread_from_file, copy_polygon_area
 from helper.util import generate_uuid
 from io import BytesIO
 import threading
 from PyPatchMatch import patch_match
-# from patchmatch import patch_match
 
 try_on = Blueprint('try_on', __name__)
 
@@ -81,12 +81,12 @@ def generate_try_on(try_on_id, text_prompt, clothing_url):
 @try_on.post('/erase-rectangle')
 def erase_polygon():
   print('receive call /erase-rectangle')
+  img = imread_from_file(request.files['image'])
+  cv2.imwrite('input_image.png', img)
   # 获取前端传递的多边形坐标
-  data = request.get_json(force = True)
-  print('data: ', data)
-  img = imread_image_from_url(data['generation_image_url'])
+  polygon_coordinates = json.loads(request.form.get('polygon_coordinates'))
   polygon = np.array(
-    [[int(point[0]), int(point[1])] for point in data['polygon_coordinates']],
+    [[int(point[0]), int(point[1])] for point in polygon_coordinates],
     np.int32
   )
   polygon = polygon.reshape((-1, 1, 2))
@@ -96,9 +96,8 @@ def erase_polygon():
   # 填充多边形区域
   cv2.fillPoly(mask, [polygon], 255)
 
-  # 清除多边形区域，保留背景
+  # 清除多边形区域，保留背景(PatchMatch算法在清除大面积区域要优于cv2.inpaint)
   result = patch_match.inpaint(img, mask, patch_size=3)
-  # result = cv2.inpaint(img, mask, 3, cv2.INPAINT_TELEA)
 
   # 将处理后的图像编码为 jpeg
   _, buffer = cv2.imencode('.jpg', result)
@@ -107,21 +106,22 @@ def erase_polygon():
   return send_file(io_buf, mimetype='image/jpeg')
 
 @try_on.post('/copy-to-generation-from-source')
-def update_generation_image():
-  print('receive call /erase-rectangle')
-  # 获取前端传递的多边形坐标
-  data = request.get_json(force = True)
-  print('data: ', data)
-  source_image = imread_image_from_url(data['source_image_url'])
-  generation_image = imread_image_from_url(data['generation_image_url'])
+def copy_source_to_generation_image():
+  print('receive call /copy-to-generation-from-source')
+  generation_image = imread_from_file(request.files['generation_image'])
+  source_image = imread_image_from_url(request.form.get('source_image_url'))
+  source_coordinates = json.loads(request.form.get('source_coordinates'))
+  source_bounding_box = json.loads(request.form.get('source_bounding_box'))
+  generation_coordinates = json.loads(request.form.get('generation_coordinates'))
+  generation_bounding_box = json.loads(request.form.get('generation_bounding_box'))
   print('start copy')
   result = copy_polygon_area(
     source_image,
-    np.array(data['source_coordinates']),
-    data['source_bounding_box'],
+    np.array(source_coordinates),
+    source_bounding_box,
     generation_image,
-    np.array(data['generation_coordinates']),
-    data['generation_bounding_box'],
+    np.array(generation_coordinates),
+    generation_bounding_box,
   )
   print('finish copy')
 
