@@ -3,7 +3,7 @@ import json
 import cv2
 import numpy as np
 from helper.mysql import execute_sql
-from helper.request import request_fooocus_try_on
+from helper.request import request_idm_vton
 from helper.image import imread_image_from_url, imread_from_file, copy_polygon_area
 from helper.util import generate_uuid
 from io import BytesIO
@@ -12,19 +12,77 @@ from PyPatchMatch import patch_match
 
 try_on = Blueprint('try_on', __name__)
 
-keyword_to_prompt = {
-  'male-child': 'a Asian boy',
-  'female-child': 'a Asian cute girl',
-  'male-junior': 'a Asian handsome man',
-  'female-junior': 'a Asian beautiful smiling lady, long hair',
-  'male-senior': 'a Asian old healthy man',
-  'female-senior': 'a Asian old healthy woman',
-  'full-body': 'full body',
-  'upper-body': 'upper body',
-  'lower-body': 'lower body',
-  'urban': 'urban',
-  'scenery': 'scenery',
-  'cartoon': 'cartoon'
+selection_picture_dict = {
+  'male': {
+    'child': {
+      'urban': [
+      ],
+      'scenery': [
+      ],
+      'cartoon': [
+      ]
+    },
+    'junior': {
+      'urban': [
+        'https://clothing-try-on-1306401232.cos.ap-guangzhou.myqcloud.com/presave_persons/female-young-street-1.jpg'
+      ],
+      'scenery': [
+        'https://clothing-try-on-1306401232.cos.ap-guangzhou.myqcloud.com/presave_persons/female-young-scenary-1.png'
+      ],
+      'pure': [
+        'https://clothing-try-on-1306401232.cos.ap-guangzhou.myqcloud.com/presave_persons/female-yound-pure-1.jpg'
+      ]
+    },
+    'senior': {
+      'urban': [
+      ],
+      'scenery': [
+      ],
+      'cartoon': [
+      ]
+    }
+  },
+  'female': {
+    'child': {
+      'urban': [
+      ],
+      'scenery': [
+      ],
+      'cartoon': [
+      ]
+    },
+    'junior': {
+      'urban': [
+        'https://clothing-try-on-1306401232.cos.ap-guangzhou.myqcloud.com/presave_persons/female-young-street-1.jpg'
+      ],
+      'scenery': [
+        'https://clothing-try-on-1306401232.cos.ap-guangzhou.myqcloud.com/presave_persons/female-young-scenary-1.png'
+      ],
+      'pure': [
+        'https://clothing-try-on-1306401232.cos.ap-guangzhou.myqcloud.com/presave_persons/female-yound-pure-1.jpg'
+      ]
+    },
+    'senior': {
+      'urban': [
+      ],
+      'scenery': [
+      ],
+      'cartoon': [
+      ]
+    }
+  }
+  # 'male-child': 'a Asian boy',
+  # 'female-child': 'a Asian cute girl',
+  # 'male-junior': 'a Asian handsome man',
+  # 'female-junior': 'a Asian beautiful smiling lady, long hair',
+  # 'male-senior': 'a Asian old healthy man',
+  # 'female-senior': 'a Asian old healthy woman',
+  # 'full-body': 'full body',
+  # 'upper-body': 'upper body',
+  # 'lower-body': 'lower body',
+  # 'urban': 'urban',
+  # 'scenery': 'scenery',
+  # 'cartoon': 'cartoon'
 }
 
 
@@ -32,12 +90,12 @@ keyword_to_prompt = {
 def generate():
   print('receive call /generate')
   data = request.get_json(force = True)
-  text_prompt = ''
-  text_prompt += keyword_to_prompt[data['gender'] + '-' + data['age']]
-  if (data['view']):
-    text_prompt += ', ' + keyword_to_prompt[data['view']]
-  if (data['style']):
-    text_prompt += ', ' + keyword_to_prompt[data['style']]
+  gender, age, view, style = data['gender'], data['age'], data['view'], data['style']
+  text_prompt = gender
+  text_prompt += ' - ' + age
+  text_prompt += ' - ' + view
+  text_prompt += ' - ' + style
+  human_url, = selection_picture_dict[gender][age][style]
 
   real_clothing_id = data['real_clothing_id']
   try_on_id = generate_uuid(10)
@@ -51,7 +109,7 @@ def generate():
       (try_on_id, real_clothing_id, data['user_id'], text_prompt, 'processing')
     )
   # 启动异步任务
-  task_thread = threading.Thread(target=generate_try_on, args=(try_on_id, text_prompt, real_clothing_url))
+  task_thread = threading.Thread(target=generate_try_on, args=(try_on_id, human_url, real_clothing_url))
   task_thread.start()
   print('finish call /generate: ', real_clothing_id)
   return jsonify({'try_on_id': try_on_id}), 200
@@ -68,15 +126,6 @@ def listHistory():
     cursor.execute("Select * from try_on_generation where user_id = %s order by create_time desc", (user_id,))
     try_on_list = cursor.fetchall()
     return jsonify({"try_on_list": try_on_list}), 200
-
-def generate_try_on(try_on_id, text_prompt, clothing_url):
-  print('thread run generate try_on image: ', try_on_id)
-  generation_url = request_fooocus_try_on(text_prompt, clothing_url)
-  with execute_sql() as cursor:
-    if (generation_url):
-      cursor.execute("update try_on_generation set status = %s, generation_image_url = %s where id = %s", ('finished', generation_url, try_on_id))
-    else:
-      cursor.execute("update try_on_generation set status = %s where id = %s", ('failed', try_on_id))
 
 @try_on.post('/erase-rectangle')
 def erase_polygon():
@@ -151,3 +200,12 @@ def generate_detail():
       'real_clothing': { 'id': generation_row['real_clothing_id'], 'image_url': image_url }
     }
   return jsonify(generation), 200
+
+def generate_try_on(try_on_id, human_url, clothing_url):
+  print('thread run generate try_on image: ', try_on_id)
+  generation_url = request_idm_vton(human_url, clothing_url)
+  with execute_sql() as cursor:
+    if (generation_url):
+      cursor.execute("update try_on_generation set status = %s, generation_image_url = %s where id = %s", ('finished', generation_url, try_on_id))
+    else:
+      cursor.execute("update try_on_generation set status = %s where id = %s", ('failed', try_on_id))

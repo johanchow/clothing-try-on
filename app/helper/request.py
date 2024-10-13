@@ -22,11 +22,32 @@ def request_fooocus_try_on(text_prompt, clothing_url):
       "cn_type1": "ImagePrompt"
   }
   output = replicate.run(
-     "konieshadow/fooocus-api:fda927242b1db6affa1ece4f54c37f19b964666bf23b0d06ae2439067cd344a4",
+      "mrhan1993/fooocus-api:bd7d45104209dc3e1e2765d364697f1393a92a210a0e47fdf943afbd2271a48c",
+    #  "konieshadow/fooocus-api:fda927242b1db6affa1ece4f54c37f19b964666bf23b0d06ae2439067cd344a4",
       input=input
   )
   print("fooocus output: ", output)
   id, url = copy_resource_to_cos(output[0])
   return url
 
+def request_idm_vton(human_url, clothing_url):
+  print('human_url: ', human_url)
+  print('clothing_url: ', clothing_url)
+  output = replicate.run(
+    "cuuupid/idm-vton:c871bb9b046607b680449ecbae55fd8c6d945e0a1948644bf2361b3d021d3ff4",
+    input={
+        "crop": False,
+        "seed": 42,
+        "steps": 30,
+        "category": "upper_body",
+        "force_dc": False,
+        "garm_img": clothing_url,
+        "human_img": human_url,
+        "mask_only": False,
+        "garment_des": "cute pink top"
+    }
+  )
+  print('output: ', output)
+  id, url = copy_resource_to_cos(output)
+  return url
 
