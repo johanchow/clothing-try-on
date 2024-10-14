@@ -1,4 +1,6 @@
+from io import BytesIO
 from flask import Blueprint, jsonify, request, send_file
+import threading
 import json
 import cv2
 import numpy as np
@@ -6,85 +8,10 @@ from helper.mysql import execute_sql
 from helper.request import request_idm_vton
 from helper.image import imread_image_from_url, imread_from_file, copy_polygon_area
 from helper.util import generate_uuid
-from io import BytesIO
-import threading
+from helper.trie_human import trie_human
 from PyPatchMatch import patch_match
 
 try_on = Blueprint('try_on', __name__)
-
-selection_picture_dict = {
-  'male': {
-    'child': {
-      'urban': [
-      ],
-      'scenery': [
-      ],
-      'cartoon': [
-      ]
-    },
-    'junior': {
-      'urban': [
-        'https://clothing-try-on-1306401232.cos.ap-guangzhou.myqcloud.com/presave_persons/female-young-street-1.jpg'
-      ],
-      'scenery': [
-        'https://clothing-try-on-1306401232.cos.ap-guangzhou.myqcloud.com/presave_persons/female-young-scenary-1.png'
-      ],
-      'pure': [
-        'https://clothing-try-on-1306401232.cos.ap-guangzhou.myqcloud.com/presave_persons/female-yound-pure-1.jpg'
-      ]
-    },
-    'senior': {
-      'urban': [
-      ],
-      'scenery': [
-      ],
-      'cartoon': [
-      ]
-    }
-  },
-  'female': {
-    'child': {
-      'urban': [
-      ],
-      'scenery': [
-      ],
-      'cartoon': [
-      ]
-    },
-    'junior': {
-      'urban': [
-        'https://clothing-try-on-1306401232.cos.ap-guangzhou.myqcloud.com/presave_persons/female-young-street-1.jpg'
-      ],
-      'scenery': [
-        'https://clothing-try-on-1306401232.cos.ap-guangzhou.myqcloud.com/presave_persons/female-young-scenary-1.png'
-      ],
-      'pure': [
-        'https://clothing-try-on-1306401232.cos.ap-guangzhou.myqcloud.com/presave_persons/female-yound-pure-1.jpg'
-      ]
-    },
-    'senior': {
-      'urban': [
-      ],
-      'scenery': [
-      ],
-      'cartoon': [
-      ]
-    }
-  }
-  # 'male-child': 'a Asian boy',
-  # 'female-child': 'a Asian cute girl',
-  # 'male-junior': 'a Asian handsome man',
-  # 'female-junior': 'a Asian beautiful smiling lady, long hair',
-  # 'male-senior': 'a Asian old healthy man',
-  # 'female-senior': 'a Asian old healthy woman',
-  # 'full-body': 'full body',
-  # 'upper-body': 'upper body',
-  # 'lower-body': 'lower body',
-  # 'urban': 'urban',
-  # 'scenery': 'scenery',
-  # 'cartoon': 'cartoon'
-}
-
 
 @try_on.post('/generate')
 def generate():
@@ -95,7 +22,7 @@ def generate():
   text_prompt += ' - ' + age
   text_prompt += ' - ' + view
   text_prompt += ' - ' + style
-  human_url, = selection_picture_dict[gender][age][style]
+  human_url = trie_human.get_by_keys([gender, age, style])
 
   real_clothing_id = data['real_clothing_id']
   try_on_id = generate_uuid(10)
