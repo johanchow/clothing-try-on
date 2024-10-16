@@ -13,7 +13,7 @@ dbconfig = {
 pool = pooling.MySQLConnectionPool(
     pool_name = "clothing-try-on",
     pool_reset_session = False,
-    pool_size = 3,
+    pool_size = 30,
     **dbconfig
 )
 

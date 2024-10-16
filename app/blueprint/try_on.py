@@ -1,6 +1,6 @@
 from io import BytesIO
 from flask import Blueprint, jsonify, request, send_file
-import threading
+from concurrent.futures import ThreadPoolExecutor
 import json
 import cv2
 import numpy as np
@@ -12,6 +12,9 @@ from helper.trie_human import trie_human
 from PyPatchMatch import patch_match
 
 try_on = Blueprint('try_on', __name__)
+
+# 最大并发线程数，超出的请求将会自动排队等待
+executor = ThreadPoolExecutor(max_workers=10)
 
 @try_on.post('/generate')
 def generate():
@@ -36,15 +39,14 @@ def generate():
       (try_on_id, real_clothing_id, data['user_id'], text_prompt, 'processing')
     )
   # 启动异步任务
-  task_thread = threading.Thread(target=generate_try_on, args=(try_on_id, human_url, real_clothing_url))
-  task_thread.start()
+  executor.submit(generate_try_on, try_on_id, human_url, real_clothing_url)
   print('finish call /generate: ', real_clothing_id)
   return jsonify({'try_on_id': try_on_id}), 200
 
 @try_on.post('/list-history')
 def listHistory():
   data = request.get_json(force = True)
-  print(data)
+  print('receive call /list-history')
   user_id = data['user_id']
   if (user_id is None):
     jsonify({'code': 400, 'message': '没有用户id信息'})
