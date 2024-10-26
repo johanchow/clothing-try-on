@@ -44,14 +44,18 @@ def copy_resource_to_cos(resource_url):
   key = hash_string(resource_url)
   return upload_resource_to_cos(response.content, key+extension)
 
-def get_resource_from_cos(path_key):
+def get_resource_from_cos(path_key, type = 'text'):
   """get resource from cos
-  :param key(string): cos key
+  :param path_key(string): path
+  :param type(string): text or binary
   """
   response = client.get_object(
     Bucket=bucket,
     Key=path_key
   )
   # 获取文件内容
-  html_content = response['Body'].read().decode('utf-8')
-  return html_content
+  if type == 'binary':
+    content = response['Body'].get_raw_stream().read()
+  else:
+    content = response['Body'].read().decode('utf-8')
+  return content

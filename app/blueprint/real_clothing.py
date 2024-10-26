@@ -1,9 +1,10 @@
 from flask import Blueprint, jsonify, request
 from helper.resource import upload_resource_to_cos, copy_resource_to_cos
 from helper.mysql import execute_sql
-from helper.image_recognition import is_image_clothing
+from helper.image_recognition import init_cnn_model, is_image_clothing
 
 real_clothing = Blueprint('real_clothing', __name__)
+init_cnn_model()
 
 @real_clothing.post('/upload')
 def upload():

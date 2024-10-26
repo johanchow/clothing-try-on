@@ -1,21 +1,14 @@
-import os
 from io import BytesIO
+import numpy as np
 import tensorflow as tf
 from tensorflow.keras.applications import EfficientNetB0
 from tensorflow.keras.applications.efficientnet import preprocess_input, decode_predictions
 from tensorflow.keras.preprocessing import image
-import numpy as np
+from helper.resource import get_resource_from_cos
 
 # 本地开发使用，启动tensorflow时候默认下载会要求ssl
 import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
-
-# 加载预训练的 EfficientNetB0 模型
-model_path = './model/efficientnetb0.h5'
-if os.getenv("SERVER_ENV"):
-  model_path = './app/model/efficientnetb0.h5'
-
-model = EfficientNetB0(weights=model_path)
 
 def classify_image(img_bytes):
   '''
@@ -28,7 +21,7 @@ def classify_image(img_bytes):
   img_array = preprocess_input(img_array)  # 预处理为模型需要的格式
 
   # 使用模型进行预测
-  predictions = model.predict(img_array)
+  predictions = cnn_model.predict(img_array)
 
   # 将预测结果解码为可读标签
   decoded_predictions = decode_predictions(predictions, top=5)[0]
@@ -54,3 +47,16 @@ def is_image_clothing(img_file):
   if total_score > 0.5:
      return True
   return False
+
+def init_cnn_model():
+  '''
+  初始化模型，加载预训练模型
+  '''
+  global cnn_model
+  print('start to init cnn model')
+  # 加载预训练的 EfficientNetB0 模型
+  local_model_path = './efficientnetb0.h5'
+  with open(local_model_path, 'wb') as f:
+    f.write(get_resource_from_cos('libs/efficientnetb0.h5', 'binary'))
+  cnn_model = EfficientNetB0(weights=local_model_path)
+  print('finish to init cnn model')
