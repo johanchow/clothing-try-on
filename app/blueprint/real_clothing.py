@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from helper.resource import upload_resource_to_cos, copy_resource_to_cos
 from helper.mysql import execute_sql
+from helper.image_recognition import is_image_clothing
 
 real_clothing = Blueprint('real_clothing', __name__)
 
@@ -8,17 +9,16 @@ real_clothing = Blueprint('real_clothing', __name__)
 def upload():
   print('收到upload请求')
   file = request.files['clothing_image']
-  print('file: ', file)
   user_id = request.form.get('user_id')
+  confirmed = request.form.get('confirmed')
   print('user_id: ', user_id)
   # 检查文件是否有文件名
   if file.filename == '':
     return jsonify({"error": "请选择图片上传"}), 400
-  print(user_id)
+  if not confirmed and not is_image_clothing(file):
+    return jsonify({"code": 200, "message": "图片应该不是衣服"}), 200
   # 上传到cos
   id, url = upload_resource_to_cos(file, file.filename)
-  print(id)
-  print(url)
   # 保存到数据库
   with execute_sql() as cursor:
     cursor.execute("SELECT * FROM real_clothing WHERE id = %s", (id,))

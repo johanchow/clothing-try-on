@@ -1,3 +1,4 @@
+# 基础镜像
 FROM tiangolo/uwsgi-nginx-flask:python3.12
 
 # 安装系统依赖和 OpenCV
