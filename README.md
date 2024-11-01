@@ -15,3 +15,9 @@ pip list | grep numpy
 ```shell
 export FLASK_APP=app/main.py
 ```
+
+## 编译
+docker build -t clothing-try-on .
+
+## 运行
+docker run -d -p 8080:80 --name clothing-try-on-container --env-file .env clothing-try-on
