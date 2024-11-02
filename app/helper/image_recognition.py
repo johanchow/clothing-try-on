@@ -1,3 +1,4 @@
+import os
 from io import BytesIO
 import numpy as np
 import tensorflow as tf
@@ -10,6 +11,12 @@ from helper.resource import get_resource_from_cos
 import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
 
+# 加载预训练的 EfficientNetB0 模型
+model_path = './model/efficientnetb0.h5'
+if os.getenv("SERVER_ENV"):
+  model_path = './app/model/efficientnetb0.h5'
+model = EfficientNetB0(weights=model_path)
+
 def classify_image(img_bytes):
   '''
   利用预训练的 EfficientNetB0 模型对图片(BytesIO流)进行分类
@@ -21,7 +28,7 @@ def classify_image(img_bytes):
   img_array = preprocess_input(img_array)  # 预处理为模型需要的格式
 
   # 使用模型进行预测
-  predictions = cnn_model.predict(img_array)
+  predictions = model.predict(img_array)
 
   # 将预测结果解码为可读标签
   decoded_predictions = decode_predictions(predictions, top=5)[0]

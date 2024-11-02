@@ -4,7 +4,6 @@ from helper.mysql import execute_sql
 from helper.image_recognition import is_image_clothing
 
 real_clothing = Blueprint('real_clothing', __name__)
-# init_cnn_model()
 
 @real_clothing.post('/upload')
 def upload():
