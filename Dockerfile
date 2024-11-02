@@ -16,6 +16,8 @@ RUN mkdir -p /root/.config/pip && \
 RUN apt-get update && apt-get install -y libgl1-mesa-glx libglib2.0-0
 RUN apt-get install -y libopencv-dev
 
+RUN apt-get install -y vim
+
 # 设置 PKG_CONFIG_PATH
 ENV PKG_CONFIG_PATH=/usr/lib/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig:$PKG_CONFIG_PATH
 

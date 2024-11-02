@@ -2,6 +2,7 @@ import os
 from io import BytesIO
 import numpy as np
 import tensorflow as tf
+import logging
 from tensorflow.keras.applications import EfficientNetB0
 from tensorflow.keras.applications.efficientnet import preprocess_input, decode_predictions
 from tensorflow.keras.preprocessing import image
@@ -42,10 +43,11 @@ def is_image_clothing(img_file):
   '''
   # 将上传的文件对象转换为 BytesIO 流
   img_bytes = BytesIO(img_file.read())
+  logging.debug('start to classify image')
   predictions = classify_image(img_bytes)
   most_likely1_label, most_likely1_score = predictions[0][1], predictions[0][2]
   most_likely2_label, most_likely2_score = predictions[1][1], predictions[1][2]
-  print(f'image recognition result: {most_likely1_label}={most_likely1_score}; {most_likely2_label}={most_likely2_score}')
+  logging.info(f'image recognition result: {most_likely1_label}={most_likely1_score}; {most_likely2_label}={most_likely2_score}')
   if most_likely1_label not in clothing_labels:
      return False
   total_score = most_likely1_score
