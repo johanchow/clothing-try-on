@@ -30,6 +30,8 @@ RUN make
 # 切换回原始的 /app 目录（如果需要继续其他操作）
 WORKDIR /app
 
+RUN touch /var/log/uwsgi.log
+
 # 其他部分
 RUN pip install -r requirements.txt
 

@@ -17,7 +17,22 @@ export FLASK_APP=app/main.py
 ```
 
 ## 编译
+```shell
+# 进入到项目根目录
+cp ../.env . # 复制.env文件到当前目录
 docker build -t clothing-try-on .
+```
 
-## 运行
+
+## 启动运行
+```shell
+docker stop clothing-try-on-container # 停止容器
+docker rm clothing-try-on-container # 删除旧容器
 docker run -d -p 8080:80 --name clothing-try-on-container --env-file .env clothing-try-on
+```
+
+## 登录到容器里
+```shell
+dokcer exec -it clothing-try-on-container /bin/bash
+```
+

@@ -20,26 +20,35 @@ executor = ThreadPoolExecutor(max_workers=10)
 def generate():
   print('receive call /generate')
   data = request.get_json(force = True)
-  gender, age, view, style = data['gender'], data['age'], data['view'], data['style']
-  text_prompt = gender
-  text_prompt += ' - ' + age
-  text_prompt += ' - ' + view
-  text_prompt += ' - ' + style
-  human_url = trie_human.get_by_keys([gender, age, style])
-
   real_clothing_id = data['real_clothing_id']
+  gender, age, bg, style = [data.get(k) for k in ['gender', 'age', 'bg', 'style']]
+  human_photo_sql = 'select * from human_photo where 1 = 1'
+  if gender:
+    human_photo_sql += f" AND gender = '{gender}'"
+  if age:
+    human_photo_sql += f" and age = '{age}'"
+  if bg:
+    human_photo_sql += f" and bg = '{bg}'"
+  if style:
+    human_photo_sql += f" and style = '${style}'"
+  human_photo_sql += f" ORDER BY RAND() LIMIT 1"
+  print('human_photo_sql: ', human_photo_sql)
+
   try_on_id = generate_uuid(10)
   with execute_sql() as cursor:
     print('real_clothing_id: ', real_clothing_id)
     cursor.execute("Select * from real_clothing where id = %s", (real_clothing_id,))
     real_clothing = cursor.fetchone()
     real_clothing_url = real_clothing['image_url']
+    cursor.execute(human_photo_sql)
+    human_photo = cursor.fetchone()
+    human_photo_url, human_photo_id = human_photo['url'], human_photo['id']
     cursor.execute(
-      "INSERT INTO try_on_generation (id, real_clothing_id, user_id, text_prompt, status) VALUES (%s, %s, %s, %s, %s)",
-      (try_on_id, real_clothing_id, data['user_id'], text_prompt, 'processing')
+      "INSERT INTO try_on_generation (id, real_clothing_id, user_id, human_photo_id, status) VALUES (%s, %s, %s, %s, %s)",
+      (try_on_id, real_clothing_id, data['user_id'], human_photo_id, 'processing')
     )
   # 启动异步任务
-  executor.submit(generate_try_on, try_on_id, human_url, real_clothing_url)
+  executor.submit(generate_try_on, try_on_id, human_photo_url, real_clothing_url)
   print('finish call /generate: ', real_clothing_id)
   return jsonify({'try_on_id': try_on_id}), 200
 
