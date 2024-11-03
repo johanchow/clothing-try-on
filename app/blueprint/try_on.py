@@ -140,10 +140,11 @@ def generate_detail():
   return jsonify(generation), 200
 
 def generate_try_on(try_on_id, human_url, clothing_url):
-  print('thread run generate try_on image: ', try_on_id)
+  print('线程开始生成图片: ', try_on_id)
   generation_url = request_idm_vton(human_url, clothing_url)
   with execute_sql() as cursor:
     if (generation_url):
       cursor.execute("update try_on_generation set status = %s, generation_image_url = %s where id = %s", ('finished', generation_url, try_on_id))
     else:
       cursor.execute("update try_on_generation set status = %s where id = %s", ('failed', try_on_id))
+  print('线程完成生成try_on图片')

@@ -1,4 +1,3 @@
-import logging
 from flask import Blueprint, jsonify, request
 from helper.resource import upload_resource_to_cos, copy_resource_to_cos
 from helper.mysql import execute_sql
@@ -19,15 +18,16 @@ def upload():
   #if not confirmed and not is_image_clothing(file):
     #return jsonify({"code": 200, "message": "图片应该不是衣服"}), 200
   # 上传到cos
-  logging.info('start upload image to cos')
+  print('start upload image to cos')
   id, url = upload_resource_to_cos(file, file.filename)
-  logging.info('start write to db')
+  print('start write to db')
   # 保存到数据库
   with execute_sql() as cursor:
     cursor.execute("SELECT * FROM real_clothing WHERE id = %s", (id,))
     clothing = cursor.fetchone()
     if (clothing is None):
       cursor.execute("INSERT INTO real_clothing (id, user_id, image_url) VALUES (%s, %s, %s)", (id, user_id, url))
+  print('完成upload请求')
   return jsonify({'resource_id': id}), 200
 
 @real_clothing.post('/copy')
