@@ -14,8 +14,8 @@ ssl._create_default_https_context = ssl._create_unverified_context
 
 # 加载预训练的 EfficientNetB0 模型
 model_path = './model/efficientnetb0.h5'
-if os.getenv("SERVER_ENV"):
-  model_path = './app/model/efficientnetb0.h5'
+if os.getenv("SERVER_ENV") == 'prod':
+  model_path = './model/efficientnetb0.h5'
 model = EfficientNetB0(weights=model_path)
 
 def classify_image(img_bytes):

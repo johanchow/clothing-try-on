@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_cors import CORS
+import logging
 from dotenv import load_dotenv
 from blueprint.ai_picture import ai_picture
 from blueprint.try_on import try_on
@@ -7,6 +8,10 @@ from blueprint.real_clothing import real_clothing
 from blueprint.weixin_srv import weixin_srv
 from blueprint.generation import generation
 from blueprint.web_static import web_static
+
+# 自定义日志格式
+log_format = '[%(asctime)s] %(levelname)s in %(module)s: %(message)s'
+logging.basicConfig(level=logging.DEBUG, format=log_format, filename='x.log', filemode='a')
 
 load_dotenv()
 app = Flask(__name__)

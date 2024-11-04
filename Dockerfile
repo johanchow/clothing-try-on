@@ -32,6 +32,11 @@ RUN make
 # 切换回原始的 /app 目录（如果需要继续其他操作）
 WORKDIR /app
 
+# 设置多个环境变量
+ENV SERVER_ENV=prod \
+    TZ=Asia/Shanghai
+
+# uswgi的日志输入文件
 RUN touch /var/log/uwsgi.log
 
 # 其他部分
