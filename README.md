@@ -33,6 +33,6 @@ docker run -d -p 8080:80 --name clothing-try-on-container --env-file .env clothi
 
 ## 登录到容器里
 ```shell
-dokcer exec -it clothing-try-on-container /bin/bash
+docker exec -it clothing-try-on-container /bin/bash
 ```
 

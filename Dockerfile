@@ -16,6 +16,8 @@ RUN mkdir -p /root/.config/pip && \
 RUN apt-get update && apt-get install -y libgl1-mesa-glx libglib2.0-0
 RUN apt-get install -y libopencv-dev
 
+RUN apt-get install -y vim
+
 # 设置 PKG_CONFIG_PATH
 ENV PKG_CONFIG_PATH=/usr/lib/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig:$PKG_CONFIG_PATH
 
@@ -30,6 +32,11 @@ RUN make
 # 切换回原始的 /app 目录（如果需要继续其他操作）
 WORKDIR /app
 
+# 设置多个环境变量
+ENV SERVER_ENV=prod \
+    TZ=Asia/Shanghai
+
+# uswgi的日志输入文件
 RUN touch /var/log/uwsgi.log
 
 # 其他部分
