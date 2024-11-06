@@ -2,7 +2,7 @@ import os
 from io import BytesIO
 import numpy as np
 import tensorflow as tf
-import logging
+from helper.logger import logger
 from tensorflow import keras
 from tensorflow.keras.preprocessing import image
 
@@ -44,11 +44,11 @@ def is_image_clothing(img_file):
   '''
   # 将上传的文件对象转换为 BytesIO 流
   img_bytes = BytesIO(img_file.read())
-  logging.debug('start to classify image')
+  logger.debug('start to classify image')
   predictions = classify_image(img_bytes)
   most_likely1_label, most_likely1_score = predictions[0][0], predictions[0][1]
   most_likely2_label, most_likely2_score = predictions[1][0], predictions[1][1]
-  logging.info(f'image recognition result: {most_likely1_label}={most_likely1_score}; {most_likely2_label}={most_likely2_score}')
+  logger.info(f'image recognition result: {most_likely1_label}={most_likely1_score}; {most_likely2_label}={most_likely2_score}')
   total_score = most_likely1_score + most_likely2_score
   if total_score > 0.2:
      return True
