@@ -1,8 +1,10 @@
+import io
 import os
 import requests
 import mimetypes
 from qcloud_cos import CosConfig
 from qcloud_cos import CosS3Client
+from helper.logger import logger
 from helper.util import hash_string
 
 secret_id = os.getenv('COS_SECRET_ID')
@@ -28,7 +30,7 @@ def upload_resource_to_cos(resource_file, key):
     StorageClass='STANDARD',
     EnableMD5=False
   )
-  print(response)
+  logger.info('upload resource file to cos successfully: ', response)
   url = 'http://' + bucket + '.cos.' + region + '.myqcloud.com/' + key
   return response['ETag'].strip('"'), url
 
@@ -59,3 +61,19 @@ def get_resource_from_cos(path_key, type = 'text'):
   else:
     content = response['Body'].read().decode('utf-8')
   return content
+
+def transform_to_bytes(file):
+  # 如果 file 不是 BytesIO 类型，则将其转换为 BytesIO
+  if not isinstance(file, io.BytesIO):
+      # 读取 file 的内容并将其写入到 BytesIO 中
+      file_content = file.read()
+      # 创建一个新的 BytesIO 对象，并将内容写入
+      file_bytes = io.BytesIO(file_content)
+      # 重置流位置到开头
+      file_bytes.seek(0)
+  else:
+      # 如果 file 是 BytesIO，确保指针位置在开头
+      file_bytes = file
+      file_bytes.seek(0)
+
+  return file_bytes

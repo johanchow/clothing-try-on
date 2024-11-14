@@ -10,6 +10,7 @@ from helper.image import imread_image_from_url, imread_from_file, copy_polygon_a
 from helper.util import generate_uuid
 from helper.trie_human import trie_human
 from PyPatchMatch import patch_match
+from helper.logger import logger
 
 try_on = Blueprint('try_on', __name__)
 
@@ -18,25 +19,31 @@ executor = ThreadPoolExecutor(max_workers=10)
 
 @try_on.post('/generate')
 def generate():
-  print('receive call /generate')
+  logger.info('receive call /generate')
   data = request.get_json(force = True)
   real_clothing_id = data['real_clothing_id']
-  gender, age, bg, style = [data.get(k) for k in ['gender', 'age', 'bg', 'style']]
-  human_photo_sql = 'select * from human_photo where 1 = 1'
-  if gender:
-    human_photo_sql += f" AND gender = '{gender}'"
-  if age:
-    human_photo_sql += f" and age = '{age}'"
-  if bg:
-    human_photo_sql += f" and bg = '{bg}'"
-  if style:
-    human_photo_sql += f" and style = '${style}'"
-  human_photo_sql += f" ORDER BY RAND() LIMIT 1"
-  print('human_photo_sql: ', human_photo_sql)
+  if 'person_id' in data:
+    human_photo_id = data['person_id']
+    human_photo_sql = f"select * from human_photo where id = '{human_photo_id}'"
+  elif 'real_clothing_id' in data:
+    gender, age, bg, style = [data.get(k) for k in ['gender', 'age', 'bg', 'style']]
+    human_photo_sql = 'select * from human_photo where 1 = 1'
+    if gender:
+      human_photo_sql += f" AND gender = '{gender}'"
+    if age:
+      human_photo_sql += f" and age = '{age}'"
+    if bg:
+      human_photo_sql += f" and bg = '{bg}'"
+    if style:
+      human_photo_sql += f" and style = '${style}'"
+    human_photo_sql += f" ORDER BY RAND() LIMIT 1"
+  else:
+    return jsonify({'code': 400, 'message': '没有提供real_clothing_id 或 person_id'}), 200
 
+  logger.info(f'human_photo_sql: {human_photo_sql}')
   try_on_id = generate_uuid(10)
   with execute_sql() as cursor:
-    print('real_clothing_id: ', real_clothing_id)
+    logger.info(f'real_clothing_id: {real_clothing_id}')
     cursor.execute("Select * from real_clothing where id = %s", (real_clothing_id,))
     real_clothing = cursor.fetchone()
     real_clothing_url = real_clothing['image_url']
@@ -140,11 +147,11 @@ def generate_detail():
   return jsonify(generation), 200
 
 def generate_try_on(try_on_id, human_url, clothing_url):
-  print('线程开始生成图片: ', try_on_id)
+  logger.info(f'线程开始生成图片: {try_on_id}')
   generation_url = request_idm_vton(human_url, clothing_url)
   with execute_sql() as cursor:
     if (generation_url):
       cursor.execute("update try_on_generation set status = %s, generation_image_url = %s where id = %s", ('finished', generation_url, try_on_id))
     else:
       cursor.execute("update try_on_generation set status = %s where id = %s", ('failed', try_on_id))
-  print('线程完成生成try_on图片')
+  logger.info(f'线程完成生成try_on图片: {try_on_id}')

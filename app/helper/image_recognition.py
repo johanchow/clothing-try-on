@@ -36,7 +36,7 @@ def classify_image(img_bytes):
 
 upper_clothing_labels = [
    'shirt', 't-shirt', 'sweater', 'jumper', 'dress', 'pants',
-   'skirt', 'coat', 'jacket', 'wool', 'cardigan'
+   'skirt', 'coat', 'jacket', 'wool', 'cardigan', 'jersey'
 ]
 trouser_labels = ['pants', 'trousers']
 

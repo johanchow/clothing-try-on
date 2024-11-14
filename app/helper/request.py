@@ -1,5 +1,6 @@
 import replicate
 from helper.resource import copy_resource_to_cos
+from helper.logger import logger
 
 def requestReplicate(id, input):
     output = replicate.run(id, input=input)
@@ -33,6 +34,7 @@ def request_fooocus_try_on(text_prompt, clothing_url):
 def request_idm_vton(human_url, clothing_url):
   print('human_url: ', human_url)
   print('clothing_url: ', clothing_url)
+  logger.info(f'idm-vton: human_url: {human_url}, clothing_url: {clothing_url}')
   output = replicate.run(
     "cuuupid/idm-vton:c871bb9b046607b680449ecbae55fd8c6d945e0a1948644bf2361b3d021d3ff4",
     input={
@@ -47,7 +49,7 @@ def request_idm_vton(human_url, clothing_url):
         "garment_des": "cute pink top"
     }
   )
-  print('output: ', output)
+  logger.info('output: ', output)
   id, url = copy_resource_to_cos(output)
   return url
 

@@ -6,7 +6,7 @@ logging.basicConfig(level=logging.DEBUG, format=log_format, filename='x.log', fi
 
 # 创建一个StreamHandler来输出到标准输出
 console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.DEBUG)  # 设置控制台输出的最低级别
+console_handler.setLevel(logging.INFO)  # 设置控制台输出的最低级别
 
 # 为控制台处理器设置相同的格式
 console_handler.setFormatter(logging.Formatter(log_format))
