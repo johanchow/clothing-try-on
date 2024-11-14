@@ -49,7 +49,7 @@ def request_idm_vton(human_url, clothing_url):
         "garment_des": "cute pink top"
     }
   )
-  logger.info('output: ', output)
+  print(output)
   id, url = copy_resource_to_cos(output)
   return url
 
