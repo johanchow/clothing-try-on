@@ -21,7 +21,10 @@ export FLASK_APP=app/main.py
 # 进入到项目根目录
 cp ../.env . # 复制.env文件到当前目录
 docker build -t clothing-try-on .
+# 如果磁盘空间不够: 删除未使用的镜像、容器和卷
+docker system prune -a --volumes
 ```
+
 
 
 ## 启动运行

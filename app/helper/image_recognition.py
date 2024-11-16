@@ -12,7 +12,7 @@ ssl._create_default_https_context = ssl._create_unverified_context
 
 # 加载预训练的 EfficientNetB0 模型
 model_path = './model/efficientnetb0.h5'
-if os.getenv("SERVER_ENV"):
+if os.getenv("SERVER_ENV") == 'dev':
   model_path = './app/model/efficientnetb0.h5'
 model = EfficientNetB0(weights=model_path)
 
@@ -40,12 +40,12 @@ upper_clothing_labels = [
 ]
 trouser_labels = ['pants', 'trousers']
 
-def is_image_clothing(img_file):
+def is_image_clothing(img_bytes):
   '''
   判断图片(File流)是否是衣服
   '''
   # 将上传的文件对象转换为 BytesIO 流
-  img_bytes = BytesIO(img_file.read())
+  # img_bytes = BytesIO(img_file.read())
   predictions = classify_image(img_bytes)
   most_likely1_label, most_likely1_score = predictions[0][1], predictions[0][2]
   most_likely2_label, most_likely2_score = predictions[1][1], predictions[1][2]

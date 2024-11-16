@@ -16,8 +16,8 @@ def upload():
   # 检查文件是否有文件名
   if file.filename == '':
     return jsonify({"message": "请选择图片上传"}), 400
-  # if not confirmed and not is_image_clothing(file):
-  #   return jsonify({"code": 200, "message": "图片应该不是衣服"}), 200
+  # if not confirmed and not is_image_clothing(file_bytes):
+  #   return jsonify({"code": 400, "message": "图片应该不是衣服"}), 200
   # 上传到cos
   logger.info(f'start upload image to cos: {file.filename}')
   id, url = upload_resource_to_cos(file_bytes, file.filename)
