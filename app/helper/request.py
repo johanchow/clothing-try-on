@@ -31,22 +31,21 @@ def request_fooocus_try_on(text_prompt, clothing_url):
   id, url = copy_resource_to_cos(output[0])
   return url
 
-def request_idm_vton(human_url, clothing_url):
-  print('human_url: ', human_url)
-  print('clothing_url: ', clothing_url)
-  logger.info(f'idm-vton: human_url: {human_url}, clothing_url: {clothing_url}')
+def request_idm_vton(human_url, clothing_url, clothing_category):
+  logger.info(f'idm-vton: human_url: {human_url}, clothing_url: {clothing_url}, category: {clothing_category}')
   output = replicate.run(
     "cuuupid/idm-vton:c871bb9b046607b680449ecbae55fd8c6d945e0a1948644bf2361b3d021d3ff4",
     input={
         "crop": False,
         "seed": 42,
         "steps": 30,
-        "category": "upper_body",
+        # "upper_body", "lower_body", "dresses"
+        "category": clothing_category,
         "force_dc": False,
         "garm_img": clothing_url,
         "human_img": human_url,
         "mask_only": False,
-        "garment_des": "cute pink top"
+        # "garment_des": "cute pink top"
     }
   )
   print(output)

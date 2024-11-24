@@ -22,6 +22,7 @@ def generate():
   logger.info('receive call /generate')
   data = request.get_json(force = True)
   real_clothing_id = data['real_clothing_id']
+  clothing_category = data['clothing_category']
   if 'person_id' in data:
     human_photo_id = data['person_id']
     human_photo_sql = f"select * from human_photo where id = '{human_photo_id}'"
@@ -55,7 +56,7 @@ def generate():
       (try_on_id, real_clothing_id, data['user_id'], human_photo_id, 'processing')
     )
   # 启动异步任务
-  executor.submit(generate_try_on, try_on_id, human_photo_url, real_clothing_url)
+  executor.submit(generate_try_on, try_on_id, human_photo_url, real_clothing_url, clothing_category)
   print('finish call /generate: ', real_clothing_id)
   return jsonify({'try_on_id': try_on_id}), 200
 
@@ -146,9 +147,9 @@ def generate_detail():
     }
   return jsonify(generation), 200
 
-def generate_try_on(try_on_id, human_url, clothing_url):
+def generate_try_on(try_on_id, human_url, clothing_url, clothing_category):
   logger.info(f'线程开始生成图片: {try_on_id}')
-  generation_url = request_idm_vton(human_url, clothing_url)
+  generation_url = request_idm_vton(human_url, clothing_url, clothing_category)
   with execute_sql() as cursor:
     if (generation_url):
       cursor.execute("update try_on_generation set status = %s, generation_image_url = %s where id = %s", ('finished', generation_url, try_on_id))

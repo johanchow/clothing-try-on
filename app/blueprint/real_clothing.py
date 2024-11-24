@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, request
 from helper.resource import upload_resource_to_cos, copy_resource_to_cos, transform_to_bytes
 from helper.logger import logger
 from helper.mysql import execute_sql
-from helper.image_recognition import is_image_clothing
+from helper.image_recognition import detect_clothing_category
 
 real_clothing = Blueprint('real_clothing', __name__)
 
@@ -16,8 +16,9 @@ def upload():
   # 检查文件是否有文件名
   if file.filename == '':
     return jsonify({"message": "请选择图片上传"}), 400
-  # if not confirmed and not is_image_clothing(file_bytes):
-  #   return jsonify({"code": 400, "message": "图片应该不是衣服"}), 200
+  clothing_category = detect_clothing_category(file_bytes)
+  if not confirmed and not clothing_category:
+    return jsonify({"code": 4000, "message": "图片应该不是衣服"}), 200
   # 上传到cos
   logger.info(f'start upload image to cos: {file.filename}')
   id, url = upload_resource_to_cos(file_bytes, file.filename)
@@ -33,7 +34,7 @@ def upload():
     else:
       cursor.execute("UPDATE real_clothing SET user_id = %s, image_url = %s WHERE id = %s", (user_id, url, id))
   logger.info(f'完成clothing upload请求: id={id}')
-  return jsonify({'resource_id': id}), 200
+  return jsonify({'resource_id': id, 'clothing_category': clothing_category}), 200
 
 @real_clothing.post('/copy')
 def copy():

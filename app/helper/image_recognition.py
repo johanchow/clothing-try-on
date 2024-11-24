@@ -35,12 +35,12 @@ def classify_image(img_bytes):
   return decoded_predictions
 
 upper_clothing_labels = [
-   'shirt', 't-shirt', 'sweater', 'jumper', 'dress', 'pants',
-   'skirt', 'coat', 'jacket', 'wool', 'cardigan', 'jersey'
+  'shirt', 'coat', 'sweater', 'jacket', 'wool', 'cardigan', 'jersey', 'vest'
 ]
-trouser_labels = ['pants', 'trousers']
+lower_clothing_labels = ['pants', 'trousers', 'skirt', 'jean']
+dress_clothing_labels = ['pajama', 'overskirt' ,'gown', 'dress']
 
-def is_image_clothing(img_bytes):
+def detect_clothing_category(img_bytes):
   '''
   判断图片(File流)是否是衣服
   '''
@@ -50,11 +50,32 @@ def is_image_clothing(img_bytes):
   most_likely1_label, most_likely1_score = predictions[0][1], predictions[0][2]
   most_likely2_label, most_likely2_score = predictions[1][1], predictions[1][2]
   print(f'image recognition result: {most_likely1_label}={most_likely1_score}; {most_likely2_label}={most_likely2_score}')
-  if most_likely1_label not in upper_clothing_labels:
-     return False
+  if any([label in most_likely1_label for label in upper_clothing_labels]):
+    label1_clothing_category = 'upper_body'
+  elif any([label in most_likely1_label for label in lower_clothing_labels]):
+    label1_clothing_category = 'lower_body'
+  elif any([label in most_likely1_label for label in dress_clothing_labels]):
+    label1_clothing_category = 'dresses'
+  else:
+    label1_clothing_category = None
+  if not label1_clothing_category:
+     return None
   total_score = most_likely1_score
-  if most_likely2_label in upper_clothing_labels:
+
+  if any([label in most_likely2_label for label in upper_clothing_labels]):
+    label2_clothing_category = 'upper_body'
+  elif any([label in most_likely2_label for label in lower_clothing_labels]):
+    label2_clothing_category = 'lower_body'
+  elif any([label in most_likely2_label for label in dress_clothing_labels]):
+    label2_clothing_category = 'dresses'
+  else:
+    label2_clothing_category = None
+
+  if label2_clothing_category:
       total_score += most_likely2_score
   if total_score > 0.5:
-     return True
-  return False
+     return label1_clothing_category
+  return None
+
+def detect_human_count(img_bytes):
+  pass
