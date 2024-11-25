@@ -1,10 +1,12 @@
 import os
 from io import BytesIO
+from PIL import Image
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.applications import EfficientNetB0
 from tensorflow.keras.applications.efficientnet import preprocess_input, decode_predictions
 from tensorflow.keras.preprocessing import image
+from ultralytics import YOLO
 
 # 本地开发使用，启动tensorflow时候默认下载会要求ssl
 import ssl
@@ -14,7 +16,7 @@ ssl._create_default_https_context = ssl._create_unverified_context
 model_path = './model/efficientnetb0.h5'
 if os.getenv("SERVER_ENV") == 'dev':
   model_path = './app/model/efficientnetb0.h5'
-model = EfficientNetB0(weights=model_path)
+classification_model = EfficientNetB0(weights=model_path)
 
 def classify_image(img_bytes):
   '''
@@ -27,7 +29,7 @@ def classify_image(img_bytes):
   img_array = preprocess_input(img_array)  # 预处理为模型需要的格式
 
   # 使用模型进行预测
-  predictions = model.predict(img_array)
+  predictions = classification_model.predict(img_array)
 
   # 将预测结果解码为可读标签
   decoded_predictions = decode_predictions(predictions, top=5)[0]
@@ -77,5 +79,13 @@ def detect_clothing_category(img_bytes):
      return label1_clothing_category
   return None
 
+
+# 加载预训练模型
+yolo_model = YOLO('yolov8n.pt')
 def detect_human_count(img_bytes):
-  pass
+  image = Image.open(img_bytes)
+  image_np = np.array(image)
+  results = yolo_model(image_np)
+  # 获取检测到的对象类别
+  people = [det for det in results[0].boxes if det.cls == 0]  # 类别0通常是'person'
+  return len(people)
