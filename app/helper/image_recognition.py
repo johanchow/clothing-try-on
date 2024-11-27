@@ -81,7 +81,10 @@ def detect_clothing_category(img_bytes):
 
 
 # 加载预训练模型
-yolo_model = YOLO('yolov8n.pt')
+yolo_model_path = './model/yolov8n.pt'
+if os.getenv("SERVER_ENV") == 'dev':
+  yolo_model_path = './app/model/yolov8n.pt'
+yolo_model = YOLO(yolo_model_path)
 def detect_human_count(img_bytes):
   image = Image.open(img_bytes)
   image_np = np.array(image)

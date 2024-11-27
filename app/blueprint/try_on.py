@@ -11,6 +11,7 @@ from helper.util import generate_uuid
 from helper.trie_human import trie_human
 from PyPatchMatch import patch_match
 from helper.logger import logger
+from config.constant import clothing_category_body_mapping
 
 try_on = Blueprint('try_on', __name__)
 
@@ -36,7 +37,8 @@ def generate():
     if bg:
       human_photo_sql += f" and bg = '{bg}'"
     if style:
-      human_photo_sql += f" and style = '${style}'"
+      human_photo_sql += f" and style = '{style}'"
+    human_photo_sql += f" and body & {clothing_category_body_mapping[clothing_category]}"
     human_photo_sql += f" ORDER BY RAND() LIMIT 1"
   else:
     return jsonify({'code': 400, 'message': '没有提供real_clothing_id 或 person_id'}), 200

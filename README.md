@@ -14,6 +14,8 @@ pip list | grep numpy
 1. 设置环境变量，便于flask找到入口文件
 ```shell
 export FLASK_APP=app/main.py
+flask run # 用flask启动
+uwsgi --ini uwsgi-dev.ini # 使用uwsgi启动，更接近容器里情况
 ```
 
 ## 编译

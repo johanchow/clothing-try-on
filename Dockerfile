@@ -24,6 +24,7 @@ ENV PKG_CONFIG_PATH=/usr/lib/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig:$PKG_
 COPY ./app /app
 COPY ./requirements.txt /app
 COPY ./uwsgi.ini /app
+COPY ./yolov8n.pt /app
 
 # 切换到 /app/PyPatchMatch 目录
 WORKDIR /app/PyPatchMatch
