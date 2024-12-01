@@ -40,5 +40,6 @@ ENV SERVER_ENV=prod \
 RUN touch /var/log/uwsgi.log
 
 # 其他部分
+pip cache purge
 RUN pip install -r requirements.txt
 
