@@ -46,9 +46,8 @@ def detect_clothing_category(img_bytes):
   '''
   判断图片(File流)是否是衣服
   '''
-  # 将上传的文件对象转换为 BytesIO 流
-  # img_bytes = BytesIO(img_file.read())
   predictions = classify_image(img_bytes)
+  img_bytes.seek(0)
   most_likely1_label, most_likely1_score = predictions[0][1], predictions[0][2]
   most_likely2_label, most_likely2_score = predictions[1][1], predictions[1][2]
   print(f'image recognition result: {most_likely1_label}={most_likely1_score}; {most_likely2_label}={most_likely2_score}')
@@ -91,4 +90,5 @@ def detect_human_count(img_bytes):
   results = yolo_model(image_np)
   # 获取检测到的对象类别
   people = [det for det in results[0].boxes if det.cls == 0]  # 类别0通常是'person'
+  img_bytes.seek(0)
   return len(people)
