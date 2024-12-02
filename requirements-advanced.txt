@@ -1,0 +1,8 @@
+filelock==3.16.1
+fsspec==2024.10.0
+networkx==3.4.2
+torch==2.2.2
+torchvision==0.17.2
+sympy==1.13.3
+ultralytics==8.3.36
+ultralytics-thop==2.0.12
