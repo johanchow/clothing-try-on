@@ -46,11 +46,12 @@ def request_idm_vton(human_url, clothing_url, clothing_category):
           "garm_img": clothing_url,
           "human_img": human_url,
           "mask_only": False,
-          # "garment_des": "cute pink top"
+          "garment_des": ""
       }
     )
   except Exception as e:
-    logger.error(f"replicate call error: {e}")
+    error_message = str(e) if e is not None else "Unknown"
+    logger.error(f"replicate call error: {error_message}")
     return ""
   print(output)
   id, url = copy_resource_to_cos(output)

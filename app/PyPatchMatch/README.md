@@ -1,5 +1,7 @@
 PatchMatch based Inpainting
 =====================================
+Link: https://github.com/vacancy/PyPatchMatch
+
 This library implements the PatchMatch based inpainting algorithm. It provides both C++ and Python interfaces.
 This implementation is heavily based on the implementation by Younesse ANDAM:
 (younesse-cv/PatchMatch)[https://github.com/younesse-cv/PatchMatch], with some bugs fix.
