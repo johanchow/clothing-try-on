@@ -37,10 +37,11 @@ def classify_image(img_bytes):
   return decoded_predictions
 
 upper_clothing_labels = [
-  'shirt', 'coat', 'sweater', 'jacket', 'wool', 'cardigan', 'jersey', 'vest'
+  'shirt', 'coat', 'sweater', 'jacket', 'wool', 'cardigan', 'jersey', 'vest',
+  'pajama', 'fur_coat'
 ]
 lower_clothing_labels = ['pants', 'trousers', 'skirt', 'jean']
-dress_clothing_labels = ['pajama', 'overskirt' ,'gown', 'dress']
+dress_clothing_labels = ['overskirt' ,'gown', 'dress']
 
 def detect_clothing_category(img_bytes):
   '''
@@ -74,7 +75,7 @@ def detect_clothing_category(img_bytes):
 
   if label2_clothing_category:
       total_score += most_likely2_score
-  if total_score > 0.5:
+  if total_score > 0.25:
      return label1_clothing_category
   return None
 
